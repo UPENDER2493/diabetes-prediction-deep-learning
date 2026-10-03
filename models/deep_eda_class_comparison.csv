@@ -1,0 +1,5 @@
+,BMI,BMI,GenHlth,GenHlth,MentHlth,MentHlth,PhysHlth,PhysHlth,Age,Age,Income,Income
+,mean,median,mean,median,mean,median,mean,median,mean,median,mean,median
+Diabetes_binary,,,,,,,,,,,,
+0,27.806,27.0,2.385,2.0,2.978,0.0,3.641,0.0,7.814,8.0,6.19,7.0
+1,31.944,31.0,3.291,3.0,4.462,0.0,7.954,1.0,9.379,10.0,5.21,6.0

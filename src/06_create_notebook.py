@@ -1,0 +1,1306 @@
+import os
+import nbformat as nbf
+
+
+# ================================================================
+# STEP 7 - CREATE JUPYTER NOTEBOOK
+# ================================================================
+
+PROJECT_ROOT = os.path.dirname(
+    os.path.dirname(
+        os.path.abspath(__file__)
+    )
+)
+
+NOTEBOOK_DIR = os.path.join(
+    PROJECT_ROOT,
+    "notebooks"
+)
+
+NOTEBOOK_PATH = os.path.join(
+    NOTEBOOK_DIR,
+    "Diabetes_Deep_Learning_Analysis.ipynb"
+)
+
+os.makedirs(
+    NOTEBOOK_DIR,
+    exist_ok=True
+)
+
+
+# ================================================================
+# HELPER FUNCTIONS
+# ================================================================
+
+def markdown(text):
+    return nbf.v4.new_markdown_cell(text)
+
+
+def python_code(text):
+    return nbf.v4.new_code_cell(text)
+
+
+# ================================================================
+# NOTEBOOK
+# ================================================================
+
+cells = []
+
+
+# ================================================================
+# 1. TITLE
+# ================================================================
+
+cells.append(
+    markdown(
+        "# Diabetes Health Indicators: Deep Learning Classification\n\n"
+        "## Deep Learning Application in Data Science\n\n"
+        "**Project Type:** Binary Classification  \n"
+        "**Framework:** PyTorch  \n"
+        "**Dataset:** CDC Diabetes Health Indicators  \n"
+        "**Source:** UCI Machine Learning Repository  \n"
+        "**Hardware:** CPU\n\n"
+        "---\n\n"
+        "## Project Objective\n\n"
+        "The objective of this project is to develop a deep learning "
+        "model that predicts whether an individual belongs to the "
+        "diabetes class using health, lifestyle, demographic, and "
+        "socioeconomic indicators.\n\n"
+        "### Workflow\n\n"
+        "1. Dataset acquisition\n"
+        "2. Data understanding\n"
+        "3. Exploratory Data Analysis\n"
+        "4. Duplicate removal\n"
+        "5. Data preprocessing\n"
+        "6. Train-validation-test splitting\n"
+        "7. Feature standardization\n"
+        "8. Neural network design\n"
+        "9. Class imbalance handling\n"
+        "10. Model training\n"
+        "11. Model evaluation\n"
+        "12. Threshold analysis\n"
+        "13. Critical analysis\n"
+        "14. Conclusion\n\n"
+        "> **Academic Disclaimer:** This project is for educational "
+        "and data-science purposes and is not intended for medical "
+        "diagnosis or clinical decision-making."
+    )
+)
+
+
+# ================================================================
+# 2. PROBLEM STATEMENT
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 1. Problem Statement\n\n"
+        "Diabetes classification is formulated as a supervised "
+        "binary classification problem.\n\n"
+        "The neural network receives health-related indicators as "
+        "input and predicts whether the target class corresponds "
+        "to diabetes.\n\n"
+        "## Target Variable\n\n"
+        "| Value | Meaning |\n"
+        "|---:|---|\n"
+        "| 0 | No Diabetes |\n"
+        "| 1 | Diabetes |\n\n"
+        "## Objective\n\n"
+        "A feed-forward Multilayer Perceptron (MLP) is used to learn "
+        "nonlinear relationships between the input features and "
+        "the binary target."
+    )
+)
+
+
+# ================================================================
+# 3. DATASET
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 2. Dataset Description\n\n"
+        "The project uses the Diabetes Health Indicators Dataset, "
+        "based on CDC BRFSS 2015 data and distributed through the "
+        "UCI Machine Learning Repository.\n\n"
+        "## Selected Dataset\n\n"
+        "`diabetes_binary_health_indicators_BRFSS2015.csv`\n\n"
+        "## Dataset Characteristics\n\n"
+        "- Original records: **253,680**\n"
+        "- Input features: **21**\n"
+        "- Target variables: **1**\n"
+        "- Total columns: **22**\n"
+        "- Missing values: **0**\n"
+        "- Duplicate rows: **24,206**\n\n"
+        "The selected dataset is the binary classification version."
+    )
+)
+
+
+# ================================================================
+# 4. IMPORTS
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 3. Import Libraries"
+    )
+)
+
+cells.append(
+    python_code(
+        "import os\n"
+        "import json\n"
+        "\n"
+        "import numpy as np\n"
+        "import pandas as pd\n"
+        "\n"
+        "import matplotlib.pyplot as plt\n"
+        "import seaborn as sns\n"
+        "\n"
+        "from sklearn.model_selection import train_test_split\n"
+        "from sklearn.preprocessing import StandardScaler\n"
+        "\n"
+        "from sklearn.metrics import (\n"
+        "    accuracy_score,\n"
+        "    precision_score,\n"
+        "    recall_score,\n"
+        "    f1_score,\n"
+        "    roc_auc_score,\n"
+        "    classification_report,\n"
+        "    confusion_matrix,\n"
+        "    roc_curve\n"
+        ")\n"
+        "\n"
+        "import torch\n"
+        "import torch.nn as nn\n"
+        "\n"
+        "print('PyTorch version:', torch.__version__)\n"
+        "\n"
+        "device = torch.device(\n"
+        "    'cuda' if torch.cuda.is_available() else 'cpu'\n"
+        ")\n"
+        "\n"
+        "print('Device:', device)"
+    )
+)
+
+
+# ================================================================
+# 5. LOAD DATA
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 4. Load Dataset\n\n"
+        "The dataset is loaded from the project's data directory."
+    )
+)
+
+cells.append(
+    python_code(
+        "DATA_PATH = (\n"
+        "    '../data/'\n"
+        "    'diabetes_binary_health_indicators_BRFSS2015.csv'\n"
+        ")\n"
+        "\n"
+        "df = pd.read_csv(DATA_PATH)\n"
+        "\n"
+        "print('Dataset shape:', df.shape)\n"
+        "\n"
+        "display(df.head())"
+    )
+)
+
+
+# ================================================================
+# 6. DATA UNDERSTANDING
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 5. Data Understanding\n\n"
+        "The initial inspection examines dataset dimensions, "
+        "column names, data types, missing values, duplicate "
+        "records, and target distribution."
+    )
+)
+
+cells.append(
+    python_code(
+        "print('=' * 60)\n"
+        "print('DATASET INFORMATION')\n"
+        "print('=' * 60)\n"
+        "\n"
+        "print('\\nShape:')\n"
+        "print(df.shape)\n"
+        "\n"
+        "print('\\nColumns:')\n"
+        "print(df.columns.tolist())\n"
+        "\n"
+        "print('\\nData Types:')\n"
+        "print(df.dtypes)\n"
+        "\n"
+        "print('\\nMissing Values:')\n"
+        "print(df.isnull().sum().sum())\n"
+        "\n"
+        "print('\\nDuplicate Rows:')\n"
+        "print(df.duplicated().sum())\n"
+        "\n"
+        "print('\\nTarget Distribution:')\n"
+        "print(df['Diabetes_binary'].value_counts())"
+    )
+)
+
+
+# ================================================================
+# 7. TARGET DISTRIBUTION
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 6. Exploratory Data Analysis\n\n"
+        "## Target Distribution\n\n"
+        "The target distribution is examined because the dataset "
+        "contains an imbalance between the No Diabetes and "
+        "Diabetes classes."
+    )
+)
+
+cells.append(
+    python_code(
+        "target_counts = (\n"
+        "    df['Diabetes_binary']\n"
+        "    .value_counts()\n"
+        "    .sort_index()\n"
+        ")\n"
+        "\n"
+        "plt.figure(figsize=(8, 5))\n"
+        "\n"
+        "plt.bar(\n"
+        "    ['No Diabetes', 'Diabetes'],\n"
+        "    target_counts.values\n"
+        ")\n"
+        "\n"
+        "plt.title('Diabetes Target Distribution')\n"
+        "plt.xlabel('Class')\n"
+        "plt.ylabel('Number of Records')\n"
+        "plt.tight_layout()\n"
+        "plt.show()"
+    )
+)
+
+
+# ================================================================
+# 8. CORRELATION
+# ================================================================
+
+cells.append(
+    markdown(
+        "## Feature Correlation with Diabetes\n\n"
+        "Pearson correlation is used to examine linear association "
+        "between individual numerical features and the target.\n\n"
+        "**Correlation does not imply causation.**"
+    )
+)
+
+cells.append(
+    python_code(
+        "correlations = (\n"
+        "    df.corr(numeric_only=True)['Diabetes_binary']\n"
+        "    .drop('Diabetes_binary')\n"
+        "    .sort_values(key=abs, ascending=False)\n"
+        ")\n"
+        "\n"
+        "print('Top 10 feature correlations:')\n"
+        "display(\n"
+        "    correlations.head(10).to_frame('Correlation')\n"
+        ")"
+    )
+)
+
+
+# ================================================================
+# 9. HEATMAP
+# ================================================================
+
+cells.append(
+    python_code(
+        "plt.figure(figsize=(13, 9))\n"
+        "\n"
+        "sns.heatmap(\n"
+        "    df.corr(numeric_only=True),\n"
+        "    cmap='coolwarm',\n"
+        "    center=0\n"
+        ")\n"
+        "\n"
+        "plt.title('Feature Correlation Heatmap')\n"
+        "plt.tight_layout()\n"
+        "plt.show()"
+    )
+)
+
+
+# ================================================================
+# 10. DUPLICATES
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 7. Duplicate Removal\n\n"
+        "The original dataset contains **24,206 exact duplicate "
+        "rows**.\n\n"
+        "Exact duplicate rows are removed before the train, "
+        "validation, and test split."
+    )
+)
+
+cells.append(
+    python_code(
+        "original_rows = len(df)\n"
+        "duplicate_count = df.duplicated().sum()\n"
+        "\n"
+        "df = df.drop_duplicates().reset_index(drop=True)\n"
+        "\n"
+        "print('Original rows:', original_rows)\n"
+        "print('Duplicates removed:', duplicate_count)\n"
+        "print('Rows after duplicate removal:', len(df))"
+    )
+)
+
+
+# ================================================================
+# 11. FEATURES AND TARGET
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 8. Feature and Target Separation"
+    )
+)
+
+cells.append(
+    python_code(
+        "X = df.drop(columns=['Diabetes_binary'])\n"
+        "y = df['Diabetes_binary']\n"
+        "\n"
+        "print('Features:', X.shape)\n"
+        "print('Target:', y.shape)\n"
+        "\n"
+        "print('\\nTarget distribution after duplicate removal:')\n"
+        "print(y.value_counts())"
+    )
+)
+
+
+# ================================================================
+# 12. SPLIT
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 9. Train / Validation / Test Split\n\n"
+        "The cleaned dataset is divided into 70% training, "
+        "15% validation, and 15% testing.\n\n"
+        "Stratification is used to preserve class proportions.\n\n"
+        "Random seed: **42**"
+    )
+)
+
+cells.append(
+    python_code(
+        "X_train, X_temp, y_train, y_temp = train_test_split(\n"
+        "    X,\n"
+        "    y,\n"
+        "    test_size=0.30,\n"
+        "    random_state=42,\n"
+        "    stratify=y\n"
+        ")\n"
+        "\n"
+        "X_val, X_test, y_val, y_test = train_test_split(\n"
+        "    X_temp,\n"
+        "    y_temp,\n"
+        "    test_size=0.50,\n"
+        "    random_state=42,\n"
+        "    stratify=y_temp\n"
+        ")\n"
+        "\n"
+        "print('Training:', X_train.shape)\n"
+        "print('Validation:', X_val.shape)\n"
+        "print('Test:', X_test.shape)"
+    )
+)
+
+
+# ================================================================
+# 13. SCALING
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 10. Feature Standardization\n\n"
+        "StandardScaler is fitted only on the training data and "
+        "then applied to validation and test data.\n\n"
+        "This prevents information leakage."
+    )
+)
+
+cells.append(
+    python_code(
+        "scaler = StandardScaler()\n"
+        "\n"
+        "X_train_scaled = scaler.fit_transform(X_train)\n"
+        "X_val_scaled = scaler.transform(X_val)\n"
+        "X_test_scaled = scaler.transform(X_test)\n"
+        "\n"
+        "print('Training scaled:', X_train_scaled.shape)\n"
+        "print('Validation scaled:', X_val_scaled.shape)\n"
+        "print('Test scaled:', X_test_scaled.shape)"
+    )
+)
+
+
+# ================================================================
+# 14. TENSORS
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 11. Convert Data to PyTorch Tensors"
+    )
+)
+
+cells.append(
+    python_code(
+        "X_train_tensor = torch.tensor(\n"
+        "    X_train_scaled,\n"
+        "    dtype=torch.float32\n"
+        ")\n"
+        "\n"
+        "X_val_tensor = torch.tensor(\n"
+        "    X_val_scaled,\n"
+        "    dtype=torch.float32\n"
+        ")\n"
+        "\n"
+        "X_test_tensor = torch.tensor(\n"
+        "    X_test_scaled,\n"
+        "    dtype=torch.float32\n"
+        ")\n"
+        "\n"
+        "y_train_tensor = torch.tensor(\n"
+        "    y_train.values,\n"
+        "    dtype=torch.float32\n"
+        ").view(-1, 1)\n"
+        "\n"
+        "y_val_tensor = torch.tensor(\n"
+        "    y_val.values,\n"
+        "    dtype=torch.float32\n"
+        ").view(-1, 1)\n"
+        "\n"
+        "y_test_tensor = torch.tensor(\n"
+        "    y_test.values,\n"
+        "    dtype=torch.float32\n"
+        ").view(-1, 1)\n"
+        "\n"
+        "print('Tensor conversion completed.')"
+    )
+)
+
+
+# ================================================================
+# 15. ARCHITECTURE
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 12. Neural Network Architecture\n\n"
+        "The project uses a **Multilayer Perceptron (MLP)**.\n\n"
+        "## Network Structure\n\n"
+        "```text\n"
+        "21 Input Features\n"
+        "       |\n"
+        "       v\n"
+        "Linear 21 -> 64\n"
+        "       |\n"
+        "BatchNorm1d\n"
+        "       |\n"
+        "ReLU\n"
+        "       |\n"
+        "Dropout 0.30\n"
+        "       |\n"
+        "Linear 64 -> 32\n"
+        "       |\n"
+        "BatchNorm1d\n"
+        "       |\n"
+        "ReLU\n"
+        "       |\n"
+        "Dropout 0.20\n"
+        "       |\n"
+        "Linear 32 -> 16\n"
+        "       |\n"
+        "ReLU\n"
+        "       |\n"
+        "Linear 16 -> 1\n"
+        "       |\n"
+        "       v\n"
+        "Diabetes Probability\n"
+        "```\n\n"
+        "## Design Justification\n\n"
+        "- 21 input features match the dataset.\n"
+        "- 64, 32, and 16 neurons progressively compress the "
+        "representation.\n"
+        "- ReLU provides nonlinear transformations.\n"
+        "- Batch normalization improves training stability.\n"
+        "- Dropout provides regularization.\n"
+        "- A single output neuron is appropriate for binary "
+        "classification.\n"
+        "- BCEWithLogitsLoss provides numerically stable binary "
+        "classification loss."
+    )
+)
+
+
+# ================================================================
+# 16. MODEL
+# ================================================================
+
+cells.append(
+    python_code(
+        "class DiabetesMLP(nn.Module):\n"
+        "\n"
+        "    def __init__(self, input_features=21):\n"
+        "        super().__init__()\n"
+        "\n"
+        "        self.network = nn.Sequential(\n"
+        "            nn.Linear(input_features, 64),\n"
+        "            nn.BatchNorm1d(64),\n"
+        "            nn.ReLU(),\n"
+        "            nn.Dropout(0.30),\n"
+        "            nn.Linear(64, 32),\n"
+        "            nn.BatchNorm1d(32),\n"
+        "            nn.ReLU(),\n"
+        "            nn.Dropout(0.20),\n"
+        "            nn.Linear(32, 16),\n"
+        "            nn.ReLU(),\n"
+        "            nn.Linear(16, 1)\n"
+        "        )\n"
+        "\n"
+        "    def forward(self, x):\n"
+        "        return self.network(x)\n"
+        "\n"
+        "\n"
+        "model = DiabetesMLP()\n"
+        "\n"
+        "print(model)"
+    )
+)
+
+
+# ================================================================
+# 17. TRAINING CONFIG
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 13. Training Configuration\n\n"
+        "| Parameter | Value |\n"
+        "|---|---:|\n"
+        "| Optimizer | AdamW |\n"
+        "| Learning Rate | 0.001 |\n"
+        "| Weight Decay | 0.0001 |\n"
+        "| Batch Size | 1024 |\n"
+        "| Maximum Epochs | 30 |\n"
+        "| Early Stopping Patience | 7 |\n"
+        "| Dropout | 0.30 / 0.20 |\n"
+        "| Random Seed | 42 |\n"
+        "| Device | CPU |\n"
+        "| Positive Class Weight | 5.5382 |\n\n"
+        "The positive class weight was used to address the class "
+        "imbalance."
+    )
+)
+
+
+# ================================================================
+# 18. TRAINING RESULTS
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 14. Training Results\n\n"
+        "The model was trained with early stopping.\n\n"
+        "The best validation checkpoint was obtained at "
+        "**epoch 13**.\n\n"
+        "## Best Validation Results\n\n"
+        "| Metric | Result |\n"
+        "|---|---:|\n"
+        "| Validation Loss | **0.8748** |\n"
+        "| Accuracy | **70.72%** |\n"
+        "| Precision | **31.76%** |\n"
+        "| Recall | **79.60%** |\n"
+        "| F1 Score | **45.40%** |\n"
+        "| ROC-AUC | **81.95%** |"
+    )
+)
+
+
+# ================================================================
+# 19. TRAINING HISTORY
+# ================================================================
+
+cells.append(
+    python_code(
+        "history = pd.read_csv(\n"
+        "    '../models/training_history.csv'\n"
+        ")\n"
+        "\n"
+        "display(history)"
+    )
+)
+
+cells.append(
+    python_code(
+        "plt.figure(figsize=(10, 6))\n"
+        "\n"
+        "plt.plot(\n"
+        "    history['epoch'],\n"
+        "    history['train_loss'],\n"
+        "    marker='o',\n"
+        "    label='Training Loss'\n"
+        ")\n"
+        "\n"
+        "plt.plot(\n"
+        "    history['epoch'],\n"
+        "    history['val_loss'],\n"
+        "    marker='o',\n"
+        "    label='Validation Loss'\n"
+        ")\n"
+        "\n"
+        "plt.xlabel('Epoch')\n"
+        "plt.ylabel('Loss')\n"
+        "plt.title('Training and Validation Loss')\n"
+        "plt.legend()\n"
+        "plt.grid(True, alpha=0.3)\n"
+        "plt.tight_layout()\n"
+        "plt.show()"
+    )
+)
+
+
+# ================================================================
+# 20. VALIDATION METRICS
+# ================================================================
+
+cells.append(
+    python_code(
+        "plt.figure(figsize=(10, 6))\n"
+        "\n"
+        "plt.plot(\n"
+        "    history['epoch'],\n"
+        "    history['accuracy'],\n"
+        "    marker='o',\n"
+        "    label='Accuracy'\n"
+        ")\n"
+        "\n"
+        "plt.plot(\n"
+        "    history['epoch'],\n"
+        "    history['precision'],\n"
+        "    marker='o',\n"
+        "    label='Precision'\n"
+        ")\n"
+        "\n"
+        "plt.plot(\n"
+        "    history['epoch'],\n"
+        "    history['recall'],\n"
+        "    marker='o',\n"
+        "    label='Recall'\n"
+        ")\n"
+        "\n"
+        "plt.plot(\n"
+        "    history['epoch'],\n"
+        "    history['f1'],\n"
+        "    marker='o',\n"
+        "    label='F1 Score'\n"
+        ")\n"
+        "\n"
+        "plt.xlabel('Epoch')\n"
+        "plt.ylabel('Metric Value')\n"
+        "plt.title('Validation Classification Metrics')\n"
+        "plt.legend()\n"
+        "plt.grid(True, alpha=0.3)\n"
+        "plt.tight_layout()\n"
+        "plt.show()"
+    )
+)
+
+
+# ================================================================
+# 21. TEST RESULTS
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 15. Test-Set Evaluation\n\n"
+        "The best saved model was evaluated on the unseen test "
+        "dataset.\n\n"
+        "## Final Test Metrics\n\n"
+        "| Metric | Result |\n"
+        "|---|---:|\n"
+        "| Accuracy | **70.48%** |\n"
+        "| Precision | **31.54%** |\n"
+        "| Recall | **79.49%** |\n"
+        "| F1 Score | **45.17%** |\n"
+        "| ROC-AUC | **81.67%** |\n\n"
+        "The primary evaluation threshold is **0.50**."
+    )
+)
+
+cells.append(
+    python_code(
+        "test_results = pd.read_csv(\n"
+        "    '../models/test_results.csv'\n"
+        ")\n"
+        "\n"
+        "display(test_results)"
+    )
+)
+
+
+# ================================================================
+# 22. CLASSIFICATION REPORT
+# ================================================================
+
+cells.append(
+    markdown(
+        "## Classification Report"
+    )
+)
+
+cells.append(
+    python_code(
+        "predictions = pd.read_csv(\n"
+        "    '../models/test_predictions.csv'\n"
+        ")\n"
+        "\n"
+        "y_true_test = predictions['actual']\n"
+        "y_pred_test = predictions['prediction']\n"
+        "\n"
+        "print(\n"
+        "    classification_report(\n"
+        "        y_true_test,\n"
+        "        y_pred_test,\n"
+        "        target_names=['No Diabetes', 'Diabetes'],\n"
+        "        digits=4\n"
+        "    )\n"
+        ")"
+    )
+)
+
+
+# ================================================================
+# 23. CONFUSION MATRIX
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 16. Confusion Matrix\n\n"
+        "At the 0.50 threshold:\n\n"
+        "| | Predicted No Diabetes | Predicted Diabetes |\n"
+        "|---|---:|---:|\n"
+        "| Actual No Diabetes | **20,075** | **9,082** |\n"
+        "| Actual Diabetes | **1,080** | **4,185** |\n\n"
+        "### Components\n\n"
+        "- True Negatives = **20,075**\n"
+        "- False Positives = **9,082**\n"
+        "- False Negatives = **1,080**\n"
+        "- True Positives = **4,185**"
+    )
+)
+
+cells.append(
+    python_code(
+        "cm = confusion_matrix(\n"
+        "    y_true_test,\n"
+        "    y_pred_test\n"
+        ")\n"
+        "\n"
+        "plt.figure(figsize=(7, 6))\n"
+        "\n"
+        "sns.heatmap(\n"
+        "    cm,\n"
+        "    annot=True,\n"
+        "    fmt='d',\n"
+        "    cmap='Blues',\n"
+        "    xticklabels=['No Diabetes', 'Diabetes'],\n"
+        "    yticklabels=['No Diabetes', 'Diabetes']\n"
+        ")\n"
+        "\n"
+        "plt.xlabel('Predicted Label')\n"
+        "plt.ylabel('Actual Label')\n"
+        "plt.title('Confusion Matrix')\n"
+        "plt.tight_layout()\n"
+        "plt.show()"
+    )
+)
+
+
+# ================================================================
+# 24. ROC CURVE
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 17. ROC Curve\n\n"
+        "The model achieved a test ROC-AUC of **0.8167**.\n\n"
+        "ROC-AUC measures the model's ability to distinguish "
+        "between the two classes across different thresholds."
+    )
+)
+
+cells.append(
+    python_code(
+        "y_probability_test = predictions['probability']\n"
+        "\n"
+        "fpr, tpr, thresholds = roc_curve(\n"
+        "    y_true_test,\n"
+        "    y_probability_test\n"
+        ")\n"
+        "\n"
+        "auc_value = roc_auc_score(\n"
+        "    y_true_test,\n"
+        "    y_probability_test\n"
+        ")\n"
+        "\n"
+        "plt.figure(figsize=(8, 6))\n"
+        "\n"
+        "plt.plot(\n"
+        "    fpr,\n"
+        "    tpr,\n"
+        "    label=f'ROC-AUC = {auc_value:.4f}'\n"
+        ")\n"
+        "\n"
+        "plt.plot(\n"
+        "    [0, 1],\n"
+        "    [0, 1],\n"
+        "    linestyle='--',\n"
+        "    label='Random Classifier'\n"
+        ")\n"
+        "\n"
+        "plt.xlabel('False Positive Rate')\n"
+        "plt.ylabel('True Positive Rate')\n"
+        "plt.title('ROC Curve')\n"
+        "plt.legend()\n"
+        "plt.grid(True, alpha=0.3)\n"
+        "plt.tight_layout()\n"
+        "plt.show()"
+    )
+)
+
+
+# ================================================================
+# 25. PROBABILITY DISTRIBUTION
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 18. Prediction Probability Distribution\n\n"
+        "The model produces a probability between 0 and 1 for "
+        "each test observation."
+    )
+)
+
+cells.append(
+    python_code(
+        "plt.figure(figsize=(10, 6))\n"
+        "\n"
+        "sns.histplot(\n"
+        "    data=predictions,\n"
+        "    x='probability',\n"
+        "    hue='actual',\n"
+        "    bins=30,\n"
+        "    kde=True,\n"
+        "    stat='density',\n"
+        "    common_norm=False\n"
+        ")\n"
+        "\n"
+        "plt.xlabel('Predicted Probability')\n"
+        "plt.ylabel('Density')\n"
+        "plt.title('Prediction Probability Distribution')\n"
+        "plt.tight_layout()\n"
+        "plt.show()"
+    )
+)
+
+
+# ================================================================
+# 26. THRESHOLD ANALYSIS
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 19. Threshold Analysis\n\n"
+        "The model produces probabilities, but a threshold is "
+        "required to convert probabilities into binary predictions.\n\n"
+        "Thresholds from **0.20 to 0.80** were evaluated.\n\n"
+        "## Threshold 0.50\n\n"
+        "- Accuracy = **70.48%**\n"
+        "- Precision = **31.54%**\n"
+        "- Recall = **79.49%**\n"
+        "- F1 Score = **45.17%**\n\n"
+        "## Threshold 0.65\n\n"
+        "- Accuracy = **79.22%**\n"
+        "- Precision = **38.59%**\n"
+        "- Recall = **60.66%**\n"
+        "- F1 Score = **47.17%**\n\n"
+        "Increasing the threshold reduces the number of positive "
+        "predictions and changes the precision-recall trade-off.\n\n"
+        "The threshold sweep is presented as a sensitivity analysis. "
+        "The 0.50 test evaluation remains the primary reported result."
+    )
+)
+
+cells.append(
+    python_code(
+        "threshold_df = pd.read_csv(\n"
+        "    '../models/threshold_analysis.csv'\n"
+        ")\n"
+        "\n"
+        "display(threshold_df)"
+    )
+)
+
+
+# ================================================================
+# 27. THRESHOLD PLOT
+# ================================================================
+
+cells.append(
+    python_code(
+        "plt.figure(figsize=(10, 6))\n"
+        "\n"
+        "plt.plot(\n"
+        "    threshold_df['Threshold'],\n"
+        "    threshold_df['Precision'],\n"
+        "    marker='o',\n"
+        "    label='Precision'\n"
+        ")\n"
+        "\n"
+        "plt.plot(\n"
+        "    threshold_df['Threshold'],\n"
+        "    threshold_df['Recall'],\n"
+        "    marker='o',\n"
+        "    label='Recall'\n"
+        ")\n"
+        "\n"
+        "plt.plot(\n"
+        "    threshold_df['Threshold'],\n"
+        "    threshold_df['F1_Score'],\n"
+        "    marker='o',\n"
+        "    label='F1 Score'\n"
+        ")\n"
+        "\n"
+        "plt.axvline(\n"
+        "    x=0.50,\n"
+        "    linestyle='--',\n"
+        "    label='Threshold = 0.50'\n"
+        ")\n"
+        "\n"
+        "plt.xlabel('Prediction Threshold')\n"
+        "plt.ylabel('Metric Value')\n"
+        "plt.title('Threshold Analysis')\n"
+        "plt.legend()\n"
+        "plt.grid(True, alpha=0.3)\n"
+        "plt.tight_layout()\n"
+        "plt.show()"
+    )
+)
+
+
+# ================================================================
+# 28. CRITICAL ANALYSIS
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 20. Critical Analysis\n\n"
+        "## Model Strengths\n\n"
+        "### Class Discrimination\n\n"
+        "The test ROC-AUC was **0.8167**, indicating that the model "
+        "has meaningful class-discrimination ability.\n\n"
+        "### Diabetes Recall\n\n"
+        "At threshold 0.50, diabetes recall was **79.49%**.\n\n"
+        "### Class Imbalance Handling\n\n"
+        "A positive-class weight of approximately **5.5382** was "
+        "used with BCEWithLogitsLoss.\n\n"
+        "### Regularization\n\n"
+        "Dropout, batch normalization, and early stopping were used "
+        "to improve generalization and training stability.\n\n"
+        "### Validation and Test Performance\n\n"
+        "Validation ROC-AUC was **81.95%** and test ROC-AUC was "
+        "**81.67%**, showing similar ranking performance.\n\n"
+        "## Limitations\n\n"
+        "- Diabetes-class precision was relatively low at **31.54%**.\n"
+        "- The model produced **9,082 false positives** at threshold 0.50.\n"
+        "- The model produced **1,080 false negatives**.\n"
+        "- The dataset is survey-based and does not represent a "
+        "complete clinical assessment.\n"
+        "- External validation was not performed.\n"
+        "- Training was performed on CPU.\n"
+        "- Performance changes with the probability threshold.\n\n"
+        "## Precision-Recall Trade-off\n\n"
+        "Lower thresholds identify more positive cases but increase "
+        "false positives. Higher thresholds make positive predictions "
+        "more selective but can increase false negatives.\n\n"
+        "The appropriate threshold depends on the intended application "
+        "and the relative consequences of different error types."
+    )
+)
+
+
+# ================================================================
+# 29. KEY INSIGHTS
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 21. Key Insights\n\n"
+        "## Dataset\n\n"
+        "- 253,680 original records\n"
+        "- 21 predictive features\n"
+        "- 24,206 duplicate rows\n"
+        "- No missing values\n"
+        "- Imbalanced target distribution\n\n"
+        "## Preprocessing\n\n"
+        "- Exact duplicates were removed.\n"
+        "- Stratified sampling was used.\n"
+        "- The split was 70% / 15% / 15%.\n"
+        "- StandardScaler was fitted only on training data.\n\n"
+        "## Deep Learning\n\n"
+        "- Architecture: **21 → 64 → 32 → 16 → 1**\n"
+        "- Batch normalization was used.\n"
+        "- Dropout rates were 0.30 and 0.20.\n"
+        "- Class-weighted BCEWithLogitsLoss was used.\n"
+        "- AdamW was used for optimization.\n"
+        "- Early stopping was applied.\n"
+        "- Best checkpoint: epoch 13.\n\n"
+        "## Final Test Results\n\n"
+        "- Accuracy: **70.48%**\n"
+        "- Precision: **31.54%**\n"
+        "- Recall: **79.49%**\n"
+        "- F1 Score: **45.17%**\n"
+        "- ROC-AUC: **81.67%**\n\n"
+        "## Main Learning\n\n"
+        "For imbalanced classification, accuracy alone does not "
+        "provide a complete picture. Precision, recall, F1 score, "
+        "ROC-AUC, confusion matrix, and threshold analysis should "
+        "be considered together."
+    )
+)
+
+
+# ================================================================
+# 30. CONCLUSION
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 22. Conclusion\n\n"
+        "This project presents an end-to-end deep learning workflow "
+        "for binary diabetes classification using the CDC Diabetes "
+        "Health Indicators dataset.\n\n"
+        "A PyTorch-based Multilayer Perceptron was developed using "
+        "a **21 → 64 → 32 → 16 → 1** architecture.\n\n"
+        "The model incorporated batch normalization, ReLU activation, "
+        "dropout regularization, class-weighted binary classification "
+        "loss, AdamW optimization, learning-rate scheduling, and "
+        "early stopping.\n\n"
+        "On the unseen test set, the model achieved:\n\n"
+        "- **70.48% Accuracy**\n"
+        "- **31.54% Precision**\n"
+        "- **79.49% Recall**\n"
+        "- **45.17% F1 Score**\n"
+        "- **81.67% ROC-AUC**\n\n"
+        "The project demonstrates the importance of combining "
+        "deep-learning architecture design, appropriate preprocessing, "
+        "class imbalance handling, multiple evaluation metrics, and "
+        "critical analysis.\n\n"
+        "The model should be considered an academic predictive "
+        "modeling exercise rather than a clinical diagnostic system."
+    )
+)
+
+
+# ================================================================
+# 31. REPRODUCIBILITY
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 23. Reproducibility\n\n"
+        "## Environment\n\n"
+        "- Python 3.14\n"
+        "- PyTorch\n"
+        "- NumPy\n"
+        "- Pandas\n"
+        "- Scikit-learn\n"
+        "- Matplotlib\n"
+        "- Seaborn\n"
+        "- Jupyter\n\n"
+        "## Random Seed\n\n"
+        "`42`\n\n"
+        "## Hardware\n\n"
+        "Training was performed on CPU because CUDA was unavailable.\n\n"
+        "## Pipeline\n\n"
+        "```text\n"
+        "Raw Dataset\n"
+        "    ↓\n"
+        "Data Understanding\n"
+        "    ↓\n"
+        "Exploratory Data Analysis\n"
+        "    ↓\n"
+        "Duplicate Removal\n"
+        "    ↓\n"
+        "Train / Validation / Test Split\n"
+        "    ↓\n"
+        "StandardScaler\n"
+        "    ↓\n"
+        "PyTorch Tensors\n"
+        "    ↓\n"
+        "Class-Weighted MLP\n"
+        "    ↓\n"
+        "Training + Validation\n"
+        "    ↓\n"
+        "Best Model\n"
+        "    ↓\n"
+        "Test Evaluation\n"
+        "    ↓\n"
+        "Threshold Analysis\n"
+        "    ↓\n"
+        "Critical Analysis\n"
+        "    ↓\n"
+        "Conclusion\n"
+        "```"
+    )
+)
+
+
+# ================================================================
+# 32. PROJECT STRUCTURE
+# ================================================================
+
+cells.append(
+    markdown(
+        "# 24. Project Structure\n\n"
+        "```text\n"
+        "Week_5_Deep_Learning/\n"
+        "│\n"
+        "├── data/\n"
+        "│   ├── diabetes_binary_health_indicators_BRFSS2015.csv\n"
+        "│   ├── download_dataset.py\n"
+        "│   └── processed/\n"
+        "│       ├── train.csv\n"
+        "│       ├── validation.csv\n"
+        "│       └── test.csv\n"
+        "│\n"
+        "├── models/\n"
+        "│   ├── diabetes_mlp_best.pt\n"
+        "│   ├── training_history.csv\n"
+        "│   ├── training_config.json\n"
+        "│   ├── test_results.csv\n"
+        "│   ├── test_predictions.csv\n"
+        "│   ├── threshold_analysis.csv\n"
+        "│   └── threshold_analysis_summary.json\n"
+        "│\n"
+        "├── src/\n"
+        "│   ├── 01_eda.py\n"
+        "│   ├── 02_preprocess.py\n"
+        "│   ├── 03_train_model.py\n"
+        "│   ├── 04_evaluate_model.py\n"
+        "│   ├── 05_threshold_analysis.py\n"
+        "│   └── 06_create_notebook.py\n"
+        "│\n"
+        "├── visualizations/\n"
+        "│   ├── 01_target_distribution.png\n"
+        "│   ├── 02_feature_distributions.png\n"
+        "│   ├── 03_correlation_heatmap.png\n"
+        "│   ├── 04_top_target_correlations.png\n"
+        "│   ├── 05_class_distribution_pie.png\n"
+        "│   ├── 07_training_validation_loss.png\n"
+        "│   ├── 08_validation_metrics.png\n"
+        "│   ├── 09_confusion_matrix.png\n"
+        "│   ├── 10_roc_curve.png\n"
+        "│   ├── 11_prediction_probability_distribution.png\n"
+        "│   └── 12_threshold_analysis.png\n"
+        "│\n"
+        "└── notebooks/\n"
+        "    └── Diabetes_Deep_Learning_Analysis.ipynb\n"
+        "```"
+    )
+)
+
+
+# ================================================================
+# CREATE NOTEBOOK
+# ================================================================
+
+notebook = nbf.v4.new_notebook()
+
+notebook["cells"] = cells
+
+notebook["metadata"] = {
+    "kernelspec": {
+        "display_name": "Python 3",
+        "language": "python",
+        "name": "python3"
+    },
+    "language_info": {
+        "name": "python",
+        "version": "3.14"
+    }
+}
+
+
+# ================================================================
+# SAVE
+# ================================================================
+
+with open(
+    NOTEBOOK_PATH,
+    "w",
+    encoding="utf-8"
+) as f:
+
+    nbf.write(
+        notebook,
+        f
+    )
+
+
+# ================================================================
+# VERIFY
+# ================================================================
+
+with open(
+    NOTEBOOK_PATH,
+    "r",
+    encoding="utf-8"
+) as f:
+
+    check = nbf.read(
+        f,
+        as_version=4
+    )
+
+
+print()
+print("=" * 70)
+print("STEP 7 COMPLETED SUCCESSFULLY")
+print("=" * 70)
+print()
+print("Notebook created:")
+print(os.path.abspath(NOTEBOOK_PATH))
+print()
+print("Total cells:", len(check["cells"]))
+print()
+print("Status: Notebook file is valid.")
+print("=" * 70)
